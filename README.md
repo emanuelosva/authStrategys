@@ -1,4 +1,7 @@
 # Guía de Autenticación y Atorización
+> Ref: 
+> 1. [Platzi](https://platzi.com/clases/passport/)
+> 2. [Guillermo Rodas](https://guillermorodas.com/)
 
 ### Stack de seguridad moderno
 Estándares adaptdos para las tecnologías móbiles y los nuevos
@@ -26,8 +29,81 @@ En terminos generales una sesion es una manera de preservar un estado deseado.
 
 Cada que se hace una petición http por primera vez, se crea una sesión. Esta sesión
 guarda información del usuario aunque no esté autenticado.
-La sesión genera un Id que se guarda en una Cockie (archivo guardado en el navegador)
+La sesión genera un Id que se guarda en una cookie (archivo guardado en el navegador)
 En procesos de autenticación. La sesión se relaciona con el usuario.
+
+#### Cookies
+Es un archivo creado por un sitio web que tiene pequeños pedazos de datos.
+Su propósito principal es almacenar a un usuario mediante el almacenamiento de su
+historial.
+Tienen un almacenamiento máximo de 4 kb.
+
+Tipos:
+* cookies session: Tiempo de vida corto. Se remueven al cerrar el tab o el navegador.
+* persistent cookies: usadas para rastrear al usuario guardando información de su interés.
+* secury cookies: Almacenan datos de manera cifrada, para evitar ser robadas. Usadas en conexiones seguras (https).
+
+Leyes (básicas):
+* Siempre avisar al usuario que estás haciedo uso de cookies en el sitio.
+* Es necesario el consentimiento del usuario para implementar el uso de cookies.
+* Si las cookies se usan para autenticación del usuario o para problemas de seguridad, esas leyes no aplica.
+
+#### Local Storage
+Almacenamiento máximo de 5 kb.
+La información almacenada en el local storage no se va a cada request que hacemos al servidor.
+Persiste aunque cerremos la ventana del navegador.
+
+En el navegador se puede acceder a la API:
+```javascript
+// Almacencar un valor
+localStorage.setItem('key', 'value');
+
+// Acceder a un valor
+localStorage.getItem('key') //ouput: 'value'
+```
+
+#### Session storage
+Similar al local storeage, sin embargo, su información solo está disponible por tab o por window.
+
+En el navegador se puede acceder a la API:
+```javascript
+// Almacencar un valor
+sessionStorage.setItem('key', 'value');
+
+// Acceder a un valor
+sessionStorage.getItem('key') //ouput: 'value'
+```
+
+**Comparación**
+
+| Tipo            | Capacidad | Tiempo de vida                 | Request             |
+| --------------- | --------- | ------------------------------ | ------------------- |
+| Cookies         | 4 kb | Puede definirse | Toda la información viaja en el request |
+| Local storage | 5 kb | Igual a la sesión del browse | La info no viaja en el request |
+| Session storage | 5 kb | Solo dispobible por tab/window | Igual que local storage |
+
+* Las cookies se pueden hacer seguras a través del flag ***httpOnly***, esto permite que la información de la cookie solo sea accedida y modificada en el srvidor.
+
+**Usos**
+
+| Tipo de información | Método recomentado |
+| ---------------------- | ------------------------- |
+| No sensible | Local storage o Session storage |
+| Medianamente sensible | Session storage o cookie |
+| Información sensible | Cookies (con flag: ***httpOnly***  ) |
+
+
+#### JsonWebToken
+**JsonWebToken** Es un estandar de la industría. Permite generar demandas entre dos clientes de manera segura. Se compone de:
+* Header -> {typ: "JWT", alg: "algotitmo de encriptación de la firma"}
+* Payload -> {...información del usuario}
+* Signature -> (header+payload)-enciptados_por_un_secreto
+
+La autenticación ocurre de la siguiente manera:
+> Autenticación -> Se firma un token que se envia al cliente
+> -> Lo almacena en memoria o en una cockie.
+
+A partír de ahí todos los request llevan ese token.
 
 ## Métodos de autenticación
 
