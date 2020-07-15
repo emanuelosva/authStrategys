@@ -22,6 +22,8 @@ Otorgar permisos y acceso de manera limitado a los recursos
 #### Sesiones
 Las solicitudes HTTP no contiene estado. Diferentes peticiones http nunca comparten información entre si.
 
+En terminos generales una sesion es una manera de preservar un estado deseado.
+
 Cada que se hace una petición http por primera vez, se crea una sesión. Esta sesión
 guarda información del usuario aunque no esté autenticado.
 La sesión genera un Id que se guarda en una Cockie (archivo guardado en el navegador)
@@ -96,3 +98,47 @@ console.log(username)
 ```bash
 output: { sub: 'usernameExample', iat: 1594833455 }
 ```
+
+#### Buenas prácticas con JWT
+JsonWebToken es una forma muy popular para lograr el proceso de autenticación, sin embargo se recomiendad algunas buenas prácticas para evitar huecos de seguridad:
+
+###### Evitar almacenar información sensible
+Debido a que el JWT es decodificable es posible visualizar la información del payload,
+por lo que ningún tipo de información sensible como contraseñas o keys, o información confidencial como número de identificación o historiales médicos deben ser enviados dentro del JWT.
+
+###### Mantener su peso lo más liviano posible
+Debido a que el JWT es mandado en cada petición, consume ancho de bada extra, por lo que para mantener un buen performance es prefirible mandar el payload solo lo necesario para mantener el flujo de la aplicación.
+
+###### Establecer tiempos de expiración cortos
+De no tomarse las medidas de almacenamiento seguras, los tokens pueden ser robados, por lo que para combatir este escho el tiempo de de expiración debe ser de 15 min hasta un máximo de 2 hrs.
+
+###### Tratar al token como opaco
+No deberiamos decodificar el token del lado del cliente, pues solo el servidor puede hacer la verificación de que la firma del token, por lo que solo éste debería de mandarlo.
+
+###### No almacenar tokens de manera insegura
+En una SPA nunca debe de almacenarse el token en el local storage o session storage.
+Debería ser almacenados en una Cockie, pero solo de manera segura y con el flah ***httOnly***, esto quire decir que la cockie solo puede provenir del servidor con el token almacenado.
+
+## Server-side vs Client-side sessions 
+
+#### Sesiones del lado del servidor
+Son una pieza de información que se guarda en memoria o en una base de datos temporal,
+como Redis, ésta permite hacerle seguimiento a la información de autenticación con el 
+fin de identificar al usuario y determinar cual es su estado de autenticación.
+Mantener la sesión de esta manera se denomina ***stateful***, es decir que maneja
+un estado.
+
+#### Sesiones del lado del cliente
+Son una manera en la que las SPA que están muy desacopladas del backend y/o no
+suelen refrescar la pagina como lo hacen las aplicaciones renderizadas desde el servidor, pueden autenticar usuarios.
+
+El mecanismo predilecto es a través de JsonWebToken. JWT es un mecanismo de autenticación sin estado ***stateless***. Por lo que no hay una sesión que exista
+del lado del servidor.
+
+Comportamiento de la sesión del lado del cliente:
+* Cuando el usuario hace “login” agregamos una bandera para indicar que lo esta.
+* En cualquier punto de la aplicación verificamos la expiración del token.
+* Si el token expira, cambiamos la bandera para indicar que el usuario no está logueado
+* Se suele chequear cuando la ruta cambia.
+* Si el token expiró lo redireccionamos a la ruta de “login” y actualizamos el estado como “logout”.
+* Se actualiza la UI para mostrar que el usuario ha cerrado la sesión.
